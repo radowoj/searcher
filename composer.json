@@ -1,0 +1,24 @@
+{
+    "name": "radowoj/searcher",
+    "description": "Unified search API with drivers for Bing and Google",
+    "type": "library",
+    "require": {
+        "guzzlehttp/guzzle": "^6.2"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Radowoj",
+            "email": "radoslaw.wojtyczka@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Radowoj\\Searcher\\": "src"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0"
+    }
+
+}

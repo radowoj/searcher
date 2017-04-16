@@ -1,0 +1,12 @@
+<phpunit bootstrap="vendor/autoload.php">
+  <testsuites>
+    <testsuite name="Radowoj/Searcher test suite">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
+  <filter>
+  <whitelist processUncoveredFilesFromWhitelist="true">
+    <directory suffix=".php">src</directory>
+  </whitelist>
+</filter>
+</phpunit>
