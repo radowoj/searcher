@@ -23,4 +23,16 @@ $results = $searcher->query('"nyan cat"')
     ->offset(0)
     ->find();
 
-var_dump($results);
+//Array access
+var_dump(($results[5])->toArray());
+
+//Traversable
+foreach($results as $result){
+    var_dump($result->toArray());
+}
+
+//Countable
+var_dump(count($results));
+
+//...and total-result-countable ;)
+var_dump($results->totalCount());

@@ -2,7 +2,7 @@
 
 namespace Radowoj\Searcher\SearchResult;
 
-class Item
+class Item implements IItem
 {
     protected $url = null;
 
@@ -25,5 +25,23 @@ class Item
             }
         }
     }
+
+
+    public function toArray()
+    {
+        return [
+            'url'           => $this->url,
+            'title'         => $this->title,
+            'description'   => $this->description,
+        ];
+    }
+
+
+    public function __toString()
+    {
+        return $this->url;
+    }
+
+
 
 }
