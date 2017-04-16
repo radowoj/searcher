@@ -4,12 +4,15 @@ namespace Radowoj\Searcher\SearchResult;
 
 use PHPUnit\Framework\TestCase;
 use Radowoj\Searcher\SearchResult\Collection;
+use Radowoj\Searcher\SearchResult\ICollection;
 use Radowoj\Searcher\SearchResult\Item;
 use Radowoj\Searcher\SearchResult\IItem;
 
 use Traversable;
 use Countable;
-
+/**
+ * @covers Radowoj\Searcher\SearchResult\Collection
+ */
 class CollectionTest extends TestCase
 {
 
@@ -28,6 +31,7 @@ class CollectionTest extends TestCase
     public function testInstantiation()
     {
         $collection = new Collection();
+        $this->assertInstanceOf(ICollection::class, $collection);
     }
 
 

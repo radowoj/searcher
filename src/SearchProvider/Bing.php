@@ -66,7 +66,9 @@ class Bing extends SearchProvider implements ISearchProvider
 
         $results = array_map(function($item) {
             return new Item([
-                'url' => $item->displayUrl,
+                'url' => preg_match('/^https?:\/\//', $item->url)
+                    ? $item->url
+                    : "http://{$item->url}",
                 'title' => $item->name,
                 'description' => $item->snippet,
             ]);

@@ -2,6 +2,8 @@
 
 namespace Radowoj\Searcher\SearchResult;
 
+use InvalidArgumentException;
+
 class Item implements IItem
 {
     protected $url = '';
@@ -9,7 +11,6 @@ class Item implements IItem
     protected $title = null;
 
     protected $description = null;
-
 
     public function __construct(array $data)
     {
@@ -20,9 +21,16 @@ class Item implements IItem
     protected function fromArray(array $data)
     {
         foreach($data as $key => $value) {
-            if (property_exists($this, $key)) {
-                $this->{$key} = $value;
+            if (!property_exists($this, $key)) {
+                throw new InvalidArgumentException("Invalid search result item property: {$key}");
             }
+
+            $validatorMethod = 'validate' . ucfirst($key);
+            if (method_exists($this, $validatorMethod)) {
+                $this->{$validatorMethod}($value);
+            }
+
+            $this->{$key} = $value;
         }
     }
 
@@ -34,6 +42,15 @@ class Item implements IItem
             'title'         => $this->title,
             'description'   => $this->description,
         ];
+    }
+
+
+
+    protected function validateUrl($url)
+    {
+        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+            throw new InvalidArgumentException("Invalid URL given: {$url}");
+        }
     }
 
 

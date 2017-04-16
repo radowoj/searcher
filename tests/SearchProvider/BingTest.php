@@ -4,6 +4,7 @@ namespace Radowoj\Searcher\SearchProvider;
 
 use PHPUnit\Framework\TestCase;
 use Radowoj\Searcher\SearchProvider\Bing;
+use Radowoj\Searcher\SearchProvider\ISearchProvider;
 use GuzzleHttp\Client as GuzzleClient;
 
 class BingTest extends TestCase
@@ -22,6 +23,7 @@ class BingTest extends TestCase
     public function testInstantiation()
     {
         $bing = new Bing(self::TEST_API_KEY, $this->guzzleMockBuilder->getMock());
+        $this->assertInstanceOf(ISearchProvider::class, $bing);
     }
 
 
