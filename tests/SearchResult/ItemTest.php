@@ -36,6 +36,7 @@ class ItemTest extends TestCase
         $this->assertSame($url, (string)$item);
     }
 
+
     /**
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage Invalid URL given:
@@ -43,6 +44,16 @@ class ItemTest extends TestCase
     public function testInvalidUrl()
     {
         $url = 'some invalid url';
-        $item = new Item(['url' => $url]);
+        new Item(['url' => $url]);
+    }
+
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Invalid search result item property
+     */
+    public function testInvalidProperty()
+    {
+        new Item(['someInvalidProperty' => 'some value']);
     }
 }
