@@ -27,7 +27,7 @@ class Bing extends SearchProvider implements ISearchProvider
     }
 
 
-    protected function searchRequest(string $query, int $limit, int $offset)
+    protected function searchRequest(string $query, int $limit, int $offset) : stdClass
     {
         $params = [
             'q' => $query,
@@ -52,15 +52,17 @@ class Bing extends SearchProvider implements ISearchProvider
     }
 
 
-    protected function makeCollection(stdClass $result)
+    protected function validateResult(stdClass $result)
     {
-        if (!isset($result->webPages->value)) {
+        if (!isset($result->webPages->value) || !isset($result->webPages->totalEstimatedMatches)) {
             throw new InvalidArgumentException("Invalid Bing API response: " . print_r($result, 1));
         }
+    }
 
-        if (!isset($result->webPages->totalEstimatedMatches)) {
-            throw new InvalidArgumentException("Invalid Bing API response: " . print_r($result, 1));
-        }
+
+    protected function getCollection(stdClass $result)
+    {
+        $this->validateResult($result);
 
         $results = array_map(function($item) {
             return new Item([

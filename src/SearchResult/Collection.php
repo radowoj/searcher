@@ -13,10 +13,10 @@ class Collection implements ICollection, ArrayAccess, IteratorAggregate, Countab
 {
     protected $items = [];
 
-    protected $totalMatches = null;
+    protected $totalMatches = 0;
 
 
-    public function __construct(array $items, int $totalMatches)
+    public function __construct(array $items = [], int $totalMatches = 0)
     {
         $this->items = $items;
         $this->totalMatches = $totalMatches;

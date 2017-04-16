@@ -3,6 +3,7 @@
     "description": "Unified search API with drivers for Bing and Google",
     "type": "library",
     "require": {
+        "php": "^7.0",
         "guzzlehttp/guzzle": "^6.2"
     },
     "license": "MIT",

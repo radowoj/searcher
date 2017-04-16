@@ -3,8 +3,9 @@
 namespace Radowoj\Searcher;
 
 use Radowoj\Searcher\SearchProvider\ISearchProvider;
+use Radowoj\Searcher\SearchResult\ICollection;
 
-class Searcher
+class Searcher implements ISearcher
 {
 
     protected $provider = null;
@@ -22,28 +23,28 @@ class Searcher
     }
 
 
-    public function query(string $query)
+    public function query(string $query) : ISearcher
     {
         $this->query = $query;
         return $this;
     }
 
 
-    public function limit(int $limit)
+    public function limit(int $limit) : ISearcher
     {
         $this->limit = $limit;
         return $this;
     }
 
 
-    public function offset(int $offset)
+    public function offset(int $offset) : ISearcher
     {
         $this->offset = $offset;
         return $this;
     }
 
 
-    public function find()
+    public function find() : ICollection
     {
         return $this->provider->search($this->query, $this->limit, $this->offset);
     }
