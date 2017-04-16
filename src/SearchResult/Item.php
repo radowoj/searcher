@@ -4,7 +4,7 @@ namespace Radowoj\Searcher\SearchResult;
 
 class Item implements IItem
 {
-    protected $url = null;
+    protected $url = '';
 
     protected $title = null;
 

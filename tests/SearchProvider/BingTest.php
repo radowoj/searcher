@@ -1,6 +1,6 @@
 <?php
 
-namespace Radowoj\Searcher;
+namespace Radowoj\Searcher\SearchProvider;
 
 use PHPUnit\Framework\TestCase;
 use Radowoj\Searcher\SearchProvider\Bing;
@@ -11,8 +11,7 @@ class BingTest extends TestCase
 
     const TEST_API_KEY = 'foo-api-key';
 
-    protected $guzzleMock = null;
-
+    protected $guzzleMockBuilder = null;
 
     public function setUp()
     {

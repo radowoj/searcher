@@ -8,6 +8,7 @@ use Countable;
 use IteratorAggregate;
 use Exception;
 use OutOfRangeException;
+use InvalidArgumentException;
 
 class Collection implements ICollection, ArrayAccess, IteratorAggregate, Countable
 {
@@ -18,6 +19,11 @@ class Collection implements ICollection, ArrayAccess, IteratorAggregate, Countab
 
     public function __construct(array $items = [], int $totalMatches = 0)
     {
+        foreach($items as $item) {
+            if (!$item instanceof IItem) {
+                throw new InvalidArgumentException('Given items must implement Radowoj\Searcher\SearchResult\IItem interface');
+            }
+        }
         $this->items = $items;
         $this->totalMatches = $totalMatches;
     }
@@ -47,13 +53,13 @@ class Collection implements ICollection, ArrayAccess, IteratorAggregate, Countab
 
     public function offsetSet($offset, $value)
     {
-        $this->immutable();
+        return $this->immutable();
     }
 
 
     public function offsetUnset($offset)
     {
-        $this->immutable();
+        return $this->immutable();
     }
 
 

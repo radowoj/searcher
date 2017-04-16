@@ -1,6 +1,6 @@
 <?php
 
-namespace Radowoj\Searcher;
+namespace Radowoj\Searcher\SearchProvider;
 
 use PHPUnit\Framework\TestCase;
 use Radowoj\Searcher\SearchProvider\SearchProvider;
