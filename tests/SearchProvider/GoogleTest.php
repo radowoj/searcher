@@ -3,14 +3,15 @@
 namespace Radowoj\Searcher\SearchProvider;
 
 use PHPUnit\Framework\TestCase;
-use Radowoj\Searcher\SearchProvider\Bing;
+use Radowoj\Searcher\SearchProvider\Google;
 use Radowoj\Searcher\SearchProvider\ISearchProvider;
 use GuzzleHttp\Client as GuzzleClient;
 
-class BingTest extends TestCase
+class GoogleTest extends TestCase
 {
 
     const TEST_API_KEY = 'foo-api-key';
+    const TEST_CX = 'foo-cx';
 
     protected $guzzleMockBuilder = null;
 
@@ -22,8 +23,8 @@ class BingTest extends TestCase
 
     public function testInstantiation()
     {
-        $bing = new Bing($this->guzzleMockBuilder->getMock(), self::TEST_API_KEY);
-        $this->assertInstanceOf(ISearchProvider::class, $bing);
+        $google = new Google($this->guzzleMockBuilder->getMock(), self::TEST_API_KEY, self::TEST_CX);
+        $this->assertInstanceOf(ISearchProvider::class, $google);
     }
 
 
@@ -42,9 +43,9 @@ class BingTest extends TestCase
     {
         if (is_null($returnValue)) {
             $returnValue = (object)[
-                'webPages' => [
-                    'value' => [],
-                    'totalEstimatedMatches' => 0,
+                'items' => [],
+                'searchInformation' => [
+                    'totalResults' => 0,
                 ]
             ];
         }
@@ -74,22 +75,30 @@ class BingTest extends TestCase
 
         $responseMock = $this->getResponseMock();
 
+        $apiKey = self::TEST_API_KEY;
+        $cx = self::TEST_CX;
+
+        $queryUrl = "https://www.googleapis.com/customsearch/v1?key={$apiKey}&q={$encodedSearchString}&cx={$cx}";
+        if ($offset) {
+            $queryUrl .= "&start={$offset}";
+        }
+
         $guzzleMock->expects($this->once())
             ->method('request')
             ->with(
                 'GET',
-                "https://api.cognitive.microsoft.com/bing/v5.0/search?q={$encodedSearchString}&count={$limit}&offset={$offset}"
+                $queryUrl
             )->willReturn($responseMock);
 
-        $bing = new Bing($guzzleMock, self::TEST_API_KEY);
+        $google = new Google($guzzleMock, self::TEST_API_KEY, self::TEST_CX);
 
-        $bing->search($searchString, $limit, $offset);
+        $google->search($searchString, $limit, $offset);
     }
 
 
     /**
      * @expectedException Exception
-     * @expectedExceptionMessage Invalid Bing API response
+     * @expectedExceptionMessage Invalid Google API response
      */
     public function testExceptionOnInvalidApiResponse()
     {
@@ -101,9 +110,9 @@ class BingTest extends TestCase
             ->method('request')
             ->willReturn($responseMock);
 
-        $bing = new Bing($guzzleMock, self::TEST_API_KEY);
+        $google = new Google($guzzleMock, self::TEST_API_KEY, self::TEST_CX);
 
-        $bing->search('foo bar');
+        $google->search('foo bar');
     }
 
 }

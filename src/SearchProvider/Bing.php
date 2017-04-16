@@ -3,11 +3,12 @@
 namespace Radowoj\Searcher\SearchProvider;
 
 use stdClass;
-use InvalidArgumentException;
+use Exception;
 
 use GuzzleHttp\Client as GuzzleClient;
 
 use Radowoj\Searcher\SearchResult\Collection;
+use Radowoj\Searcher\SearchResult\ICollection;
 use Radowoj\Searcher\SearchResult\Item;
 
 
@@ -20,7 +21,7 @@ class Bing extends SearchProvider implements ISearchProvider
 
     protected $guzzle = null;
 
-    public function __construct(string $apiKey, GuzzleClient $guzzle)
+    public function __construct(GuzzleClient $guzzle, string $apiKey)
     {
         $this->apiKey = $apiKey;
         $this->guzzle = $guzzle;
@@ -48,22 +49,30 @@ class Bing extends SearchProvider implements ISearchProvider
             ]
         );
 
-        return json_decode($result->getBody());
+        $resultObject = json_decode($result->getBody());
+        $this->validateResult($resultObject);
+        $resultObject = $this->limitResult($resultObject, $limit);
+        return $resultObject;
     }
 
 
     protected function validateResult(stdClass $result)
     {
         if (!isset($result->webPages->value) || !isset($result->webPages->totalEstimatedMatches)) {
-            throw new InvalidArgumentException("Invalid Bing API response: " . print_r($result, 1));
+            throw new Exception("Invalid Bing API response: " . print_r($result, 1));
         }
     }
 
 
-    protected function getCollection(stdClass $result)
+    protected function limitResult(stdClass $result, $limit)
     {
-        $this->validateResult($result);
+        $result->webPages->value = array_slice($result->webPages->value, 0, $limit);
+        return $result;
+    }
 
+
+    protected function getCollection(stdClass $result) : ICollection
+    {
         $results = array_map(function($item) {
             return new Item([
                 'url' => preg_match('/^https?:\/\//', $item->url)

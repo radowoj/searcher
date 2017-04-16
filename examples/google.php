@@ -3,23 +3,24 @@
 require_once(__DIR__ . '/../vendor/autoload.php');
 
 use GuzzleHttp\Client as GuzzleClient;
-use Radowoj\Searcher\SearchProvider\Bing;
+use Radowoj\Searcher\SearchProvider\Google;
 use Radowoj\Searcher\Searcher;
 
 $config = require_once('config.php');
 
 $client = new GuzzleClient();
 
-$searchProvider = new Bing(
+$searchProvider = new Google(
     $client,
-    $config['bing-api-key']
+    $config['google-api-key'],
+    $config['google-cx']
 );
 
 
 $searcher = new Searcher($searchProvider);
 
 $results = $searcher->query('"nyan cat"')
-    ->limit(20)
+    ->limit(10)
     ->offset(0)
     ->find();
 
