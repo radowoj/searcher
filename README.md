@@ -14,6 +14,12 @@ Unified search API for Google, Bing and maybe others in the future. Utilizes Guz
 * PHP >= 7.0
 * guzzlehttp/guzzle
 
+## Installation
+
+```bash
+composer require radowoj/searcher
+```
+
 ## Usage
 
 ```php
