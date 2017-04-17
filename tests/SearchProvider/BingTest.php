@@ -42,6 +42,7 @@ class BingTest extends TestCase
     {
         if (is_null($returnValue)) {
             $returnValue = (object)[
+                '_type' => 'SearchResponse',
                 'webPages' => [
                     'value' => [],
                     'totalEstimatedMatches' => 0,
@@ -112,6 +113,7 @@ class BingTest extends TestCase
         $guzzleMock = $this->guzzleMockBuilder->setMethods(['request'])->getMock();
 
         $responseMock = $this->getResponseMock((object)[
+            '_type' => 'SearchResponse',
             'webPages' => [
                 'value' => array_fill(0, 7, (object)[
                     'url' => 'http://example.com',
