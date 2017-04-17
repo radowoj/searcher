@@ -19,8 +19,14 @@ class SearchProviderTest extends TestCase
             ->will($this->returnValue(new stdClass));
 
         $mock->expects($this->once())
-            ->method('getCollection')
+            ->method('populateCollection')
             ->will($this->returnValue(new Collection));
+
+        $mock->expects($this->once())
+            ->method('validateRequestResult');
+
+        $mock->expects($this->once())
+            ->method('enforceLimit');
 
         $result = $mock->search('foo');
         $this->assertInstanceOf(ICollection::class, $result);

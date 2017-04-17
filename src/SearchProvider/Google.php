@@ -32,7 +32,7 @@ class Google extends SearchProvider implements ISearchProvider
     }
 
 
-    protected function searchRequest(string $query, int $limit, int $offset) : stdClass
+    protected function getSearchQueryString(string $query, int $limit, int $offset)
     {
         $params = [
             'key' => $this->apiKey,
@@ -50,32 +50,35 @@ class Google extends SearchProvider implements ISearchProvider
             $paramsMerged[] = "{$key}={$value}";
         }
 
-        $uri = self::URI . implode('&', $paramsMerged);
-
-        $result = $this->guzzle->request('GET', $uri);
-        $resultObject = json_decode($result->getBody());
-
-        $this->validateResult($resultObject);
-        $resultObject = $this->limitResult($resultObject, $limit);
-        return $resultObject;
+        return implode('&', $paramsMerged);
     }
 
 
-    protected function limitResult(stdClass $result, $limit)
+    protected function searchRequest(string $query, int $limit, int $offset) : stdClass
+    {
+        $uri = self::URI . $this->getSearchQueryString($query, $limit, $offset);
+
+        $result = $this->guzzle->request('GET', $uri);
+        return json_decode($result->getBody());
+    }
+
+
+    protected function enforceLimit(stdClass $result, int $limit) : stdClass
     {
         $result->items = array_slice($result->items, 0, $limit);
         return $result;
     }
 
 
-    protected function validateResult(stdClass $result)
+    protected function validateRequestResult(stdClass $result)
     {
         if (!isset($result->searchInformation->totalResults) || !isset($result->items)) {
             throw new Exception("Invalid Google API response: " . print_r($result, 1));
         }
     }
 
-    protected function getCollection(stdClass $result) : ICollection
+
+    protected function populateCollection(stdClass $result) : ICollection
     {
         $results = array_map(function($item) {
             return new Item([

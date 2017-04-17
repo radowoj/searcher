@@ -49,14 +49,11 @@ class Bing extends SearchProvider implements ISearchProvider
             ]
         );
 
-        $resultObject = json_decode($result->getBody());
-        $this->validateResult($resultObject);
-        $resultObject = $this->limitResult($resultObject, $limit);
-        return $resultObject;
+        return json_decode($result->getBody());
     }
 
 
-    protected function validateResult(stdClass $result)
+    protected function validateRequestResult(stdClass $result)
     {
         if (!isset($result->webPages->value) || !isset($result->webPages->totalEstimatedMatches)) {
             throw new Exception("Invalid Bing API response: " . print_r($result, 1));
@@ -64,14 +61,14 @@ class Bing extends SearchProvider implements ISearchProvider
     }
 
 
-    protected function limitResult(stdClass $result, $limit)
+    protected function enforceLimit(stdClass $result, int $limit) : stdClass
     {
         $result->webPages->value = array_slice($result->webPages->value, 0, $limit);
         return $result;
     }
 
 
-    protected function getCollection(stdClass $result) : ICollection
+    protected function populateCollection(stdClass $result) : ICollection
     {
         $results = array_map(function($item) {
             return new Item([
