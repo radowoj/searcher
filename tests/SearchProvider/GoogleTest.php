@@ -5,6 +5,7 @@ namespace Radowoj\Searcher\SearchProvider;
 use PHPUnit\Framework\TestCase;
 use Radowoj\Searcher\SearchProvider\Google;
 use Radowoj\Searcher\SearchProvider\ISearchProvider;
+use Radowoj\Searcher\SearchResult\ICollection;
 use GuzzleHttp\Client as GuzzleClient;
 
 class GoogleTest extends TestCase
@@ -15,11 +16,13 @@ class GoogleTest extends TestCase
 
     protected $guzzleMockBuilder = null;
 
+
     public function setUp()
     {
         $this->guzzleMockBuilder = $this->getMockBuilder(GuzzleClient::class)
             ->setMethods([]);
     }
+
 
     public function testInstantiation()
     {
@@ -142,6 +145,24 @@ class GoogleTest extends TestCase
         //limit results to two
         $result = $google->search('foo bar', 2);
         $this->assertSame(2, $result->count());
+    }
+
+
+    public function testAcceptsEmptySearchResult()
+    {
+        $guzzleMock = $this->guzzleMockBuilder->setMethods(['request'])->getMock();
+
+        $responseMock = $this->getResponseMock((object)[
+            'kind' => 'customsearch#search',
+        ]);
+
+        $guzzleMock->expects($this->once())
+            ->method('request')
+            ->willReturn($responseMock);
+
+        $google = new Google($guzzleMock, self::TEST_API_KEY, self::TEST_CX);
+        $result = $google->search('something');
+        $this->assertInstanceOf(ICollection::class, $result);
     }
 
 }

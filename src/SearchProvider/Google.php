@@ -2,7 +2,6 @@
 
 namespace Radowoj\Searcher\SearchProvider;
 
-
 use stdClass;
 use Exception;
 
@@ -11,7 +10,7 @@ use GuzzleHttp\Client as GuzzleClient;
 use Radowoj\Searcher\SearchResult\Collection;
 use Radowoj\Searcher\SearchResult\ICollection;
 use Radowoj\Searcher\SearchResult\Item;
-
+use Radowoj\Searcher\SearchResult\IItem;
 
 
 class Google extends SearchProvider implements ISearchProvider
@@ -97,23 +96,13 @@ class Google extends SearchProvider implements ISearchProvider
     }
 
 
-    protected function populateCollection(stdClass $result) : ICollection
+    protected function populateItem(stdClass $item) : IItem
     {
-        $results = array_map(function($item) {
-            return new Item([
-                'url' => $item->link,
-                'title' => $item->title,
-                'description' => $item->snippet,
-            ]);
-        }, $this->extractResults($result));
-
-
-        return new Collection(
-            $results,
-            $this->extractTotalMatches($result)
-        );
-
-        return new Collection();
+        return new Item([
+            'url' => $item->link,
+            'title' => $item->title,
+            'description' => $item->snippet,
+        ]);
     }
 
 }

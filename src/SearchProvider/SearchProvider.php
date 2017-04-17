@@ -3,7 +3,9 @@
 namespace Radowoj\Searcher\SearchProvider;
 
 use stdClass;
+use Radowoj\Searcher\SearchResult\Collection;
 use Radowoj\Searcher\SearchResult\ICollection;
+use Radowoj\Searcher\SearchResult\IItem;
 
 abstract class SearchProvider implements ISearchProvider
 {
@@ -27,20 +29,35 @@ abstract class SearchProvider implements ISearchProvider
 
 
     /**
-     * Populates Search Result Collection from data found in API response
-     * @param  stdClass     $result API response
-     * @return Radowoj\Searcher\SearchResult\ICollection  Collection of results
-     */
-    abstract protected function populateCollection(stdClass $result) : ICollection;
-
-
-    /**
      * Usually API will ignore our limit, so we must take care of it
      * @param  stdClass $result to modify
      * @param  int       $limit  limit to enforce
      * @return stdClass - result after enforcing limit
      */
     abstract protected function enforceLimit(stdClass $result, int $limit) : stdClass;
+
+    /**
+     * Creates a search result item from API-specific stdClass representing single search result
+     * @param  stdClass $item Single stdClass representing search result, fetched from search API
+     * @return IItem          Radowoj\Searcher\SearchResult\IItem  Single search result item
+     */
+    abstract protected function populateItem(stdClass $item) : IItem;
+
+
+    /**
+     * Extracts results array from API-specific response object
+     * @param  stdClass $result Response object fetched from API
+     * @return array array of stdClasses representing results
+     */
+    abstract protected function extractResults(stdClass $result) : array;
+
+
+    /**
+     * Extracts total matches from API-specific response object
+     * @param  stdClass $result Response object fetched from API
+     * @return int total number of results
+     */
+    abstract protected function extractTotalMatches(stdClass $result) : int;
 
 
     /**
@@ -59,6 +76,26 @@ abstract class SearchProvider implements ISearchProvider
         $requestResult = $this->enforceLimit($requestResult, $limit);
 
         return $this->populateCollection($requestResult);
+    }
+
+
+    /**
+     * Populates result collection. Concrete class must provide methods to populate a single item,
+     * extract results list from result object and extract total matches from result object
+     * @param  stdClass    $result result object from search api
+     * @return Radowoj\Searcher\SearchResult\ICollection  Collection of results
+     */
+    protected function populateCollection(stdClass $result) : ICollection
+    {
+        $results = array_map(function($item) {
+            return $this->populateItem($item);
+
+        }, $this->extractResults($result));
+
+        return new Collection(
+            $results,
+            $this->extractTotalMatches($result)
+        );
     }
 
 }

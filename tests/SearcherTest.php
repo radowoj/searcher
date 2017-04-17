@@ -80,10 +80,6 @@ class SearcherTest extends TestCase
             )
             ->will($this->returnValue(new stdClass));
 
-        $searchProvider->expects($this->once())
-            ->method('populateCollection')
-            ->will($this->returnValue(new Collection));
-
         $searcher = new Searcher($searchProvider);
 
         $results = $searcher

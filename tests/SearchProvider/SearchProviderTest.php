@@ -19,10 +19,6 @@ class SearchProviderTest extends TestCase
             ->will($this->returnValue(new stdClass));
 
         $mock->expects($this->once())
-            ->method('populateCollection')
-            ->will($this->returnValue(new Collection));
-
-        $mock->expects($this->once())
             ->method('validateRequestResult');
 
         $mock->expects($this->once())

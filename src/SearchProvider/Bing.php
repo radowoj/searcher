@@ -10,6 +10,7 @@ use GuzzleHttp\Client as GuzzleClient;
 use Radowoj\Searcher\SearchResult\Collection;
 use Radowoj\Searcher\SearchResult\ICollection;
 use Radowoj\Searcher\SearchResult\Item;
+use Radowoj\Searcher\SearchResult\IItem;
 
 
 class Bing extends SearchProvider implements ISearchProvider
@@ -85,25 +86,17 @@ class Bing extends SearchProvider implements ISearchProvider
             ? $result->webPages->totalEstimatedMatches
             : 0;
     }
+    
 
-
-    protected function populateCollection(stdClass $result) : ICollection
+    protected function populateItem(stdClass $item) : IItem
     {
-        $results = array_map(function($item) {
-            return new Item([
-                'url' => preg_match('/^https?:\/\//', $item->url)
-                    ? $item->url
-                    : "http://{$item->url}",
-                'title' => $item->name,
-                'description' => $item->snippet,
-            ]);
-        }, $this->extractResults($result));
-
-        return new Collection(
-            $results,
-            $this->extractTotalMatches($result)
-        );
+        return new Item([
+            'url' => preg_match('/^https?:\/\//', $item->url)
+                ? $item->url
+                : "http://{$item->url}",
+            'title' => $item->name,
+            'description' => $item->snippet,
+        ]);
     }
-
 
 }

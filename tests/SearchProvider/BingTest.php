@@ -5,6 +5,7 @@ namespace Radowoj\Searcher\SearchProvider;
 use PHPUnit\Framework\TestCase;
 use Radowoj\Searcher\SearchProvider\Bing;
 use Radowoj\Searcher\SearchProvider\ISearchProvider;
+use Radowoj\Searcher\SearchResult\ICollection;
 use GuzzleHttp\Client as GuzzleClient;
 
 class BingTest extends TestCase
@@ -20,12 +21,12 @@ class BingTest extends TestCase
             ->setMethods([]);
     }
 
+
     public function testInstantiation()
     {
         $bing = new Bing($this->guzzleMockBuilder->getMock(), self::TEST_API_KEY);
         $this->assertInstanceOf(ISearchProvider::class, $bing);
     }
-
 
 
     public function providerSearchRequestParams()
@@ -134,5 +135,24 @@ class BingTest extends TestCase
         $result = $bing->search('foo bar', 2);
         $this->assertSame(2, $result->count());
     }
+
+
+    public function testAcceptsEmptySearchResult()
+    {
+        $guzzleMock = $this->guzzleMockBuilder->setMethods(['request'])->getMock();
+
+        $responseMock = $this->getResponseMock((object)[
+            '_type' => 'SearchResponse',
+        ]);
+
+        $guzzleMock->expects($this->once())
+            ->method('request')
+            ->willReturn($responseMock);
+
+        $bing = new Bing($guzzleMock, self::TEST_API_KEY);
+        $result = $bing->search('something');
+        $this->assertInstanceOf(ICollection::class, $result);
+    }
+
 
 }
