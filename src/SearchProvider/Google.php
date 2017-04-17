@@ -65,6 +65,9 @@ class Google extends SearchProvider implements ISearchProvider
 
     protected function enforceLimit(stdClass $result, int $limit) : stdClass
     {
+        if (!isset($result->items)) {
+            return $result;
+        }
         $result->items = array_slice($result->items, 0, $limit);
         return $result;
     }
@@ -72,9 +75,25 @@ class Google extends SearchProvider implements ISearchProvider
 
     protected function validateRequestResult(stdClass $result)
     {
-        if (!isset($result->searchInformation->totalResults) || !isset($result->items)) {
+        if (!isset($result->kind) || $result->kind !== "customsearch#search") {
             throw new Exception("Invalid Google API response: " . print_r($result, 1));
         }
+    }
+
+
+    protected function extractResults(stdClass $result) : array
+    {
+        return isset($result->items)
+            ? $result->items
+            : [];
+    }
+
+
+    protected function extractTotalMatches(stdClass $result) : int
+    {
+        return isset($result->searchInformation->totalResults)
+            ? $result->searchInformation->totalResults
+            : 0;
     }
 
 
@@ -86,12 +105,12 @@ class Google extends SearchProvider implements ISearchProvider
                 'title' => $item->title,
                 'description' => $item->snippet,
             ]);
-        }, $result->items);
+        }, $this->extractResults($result));
 
 
         return new Collection(
             $results,
-            $result->searchInformation->totalResults
+            $this->extractTotalMatches($result)
         );
 
         return new Collection();

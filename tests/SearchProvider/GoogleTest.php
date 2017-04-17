@@ -43,6 +43,7 @@ class GoogleTest extends TestCase
     {
         if (is_null($returnValue)) {
             $returnValue = (object)[
+                'kind' => 'customsearch#search',
                 'items' => [],
                 'searchInformation' => [
                     'totalResults' => 0,
@@ -121,6 +122,7 @@ class GoogleTest extends TestCase
         $guzzleMock = $this->guzzleMockBuilder->setMethods(['request'])->getMock();
 
         $responseMock = $this->getResponseMock((object)[
+            'kind' => 'customsearch#search',
             'items' => array_fill(0, 7, (object)[
                 'link' => 'http://example.com',
                 'title' => 'Some title',
