@@ -79,6 +79,7 @@ class CollectionTest extends TestCase
     {
         $this->assertInstanceOf(Traversable::class, $this->collection);
         $this->assertInstanceOf(Traversable::class, $this->collection->getIterator());
+        $this->assertContainsOnly(Item::class, $this->collection->getIterator());
     }
 
 

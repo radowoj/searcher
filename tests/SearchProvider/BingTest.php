@@ -106,4 +106,31 @@ class BingTest extends TestCase
         $bing->search('foo bar');
     }
 
+
+    public function testLimitIsEnforced()
+    {
+        $guzzleMock = $this->guzzleMockBuilder->setMethods(['request'])->getMock();
+
+        $responseMock = $this->getResponseMock((object)[
+            'webPages' => [
+                'value' => array_fill(0, 7, (object)[
+                    'url' => 'http://example.com',
+                    'name' => 'Some title',
+                    'snippet' => 'Some description',
+                ]),
+                'totalEstimatedMatches' => 7000,
+            ]
+        ]);
+
+        $guzzleMock->expects($this->once())
+            ->method('request')
+            ->willReturn($responseMock);
+
+        $bing = new Bing($guzzleMock, self::TEST_API_KEY);
+
+        //limit results to two
+        $result = $bing->search('foo bar', 2);
+        $this->assertSame(2, $result->count());
+    }
+
 }

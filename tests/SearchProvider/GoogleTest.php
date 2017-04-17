@@ -115,4 +115,31 @@ class GoogleTest extends TestCase
         $google->search('foo bar');
     }
 
+
+    public function testLimitIsEnforced()
+    {
+        $guzzleMock = $this->guzzleMockBuilder->setMethods(['request'])->getMock();
+
+        $responseMock = $this->getResponseMock((object)[
+            'items' => array_fill(0, 7, (object)[
+                'link' => 'http://example.com',
+                'title' => 'Some title',
+                'snippet' => 'Some description',
+            ]),
+            'searchInformation' => [
+                'totalResults' => 7000,
+            ]
+        ]);
+
+        $guzzleMock->expects($this->once())
+            ->method('request')
+            ->willReturn($responseMock);
+
+        $google = new Google($guzzleMock, self::TEST_API_KEY, self::TEST_CX);
+
+        //limit results to two
+        $result = $google->search('foo bar', 2);
+        $this->assertSame(2, $result->count());
+    }
+
 }
