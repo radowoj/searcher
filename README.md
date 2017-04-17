@@ -19,6 +19,7 @@ Unified search API for Google, Bing and maybe others in the future. Utilizes Guz
 ```php
 use GuzzleHttp\Client as GuzzleClient;
 use Radowoj\Searcher\SearchProvider\Bing;
+use Radowoj\Searcher\SearchProvider\Google;
 use Radowoj\Searcher\Searcher;
 
 $client = new GuzzleClient();
