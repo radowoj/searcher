@@ -5,7 +5,7 @@ namespace Radowoj\Searcher\SearchProvider;
 use stdClass;
 
 use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Psr7\Response as GuzzleResponse;
+use Psr\Http\Message\ResponseInterface as Psr7Response;
 
 use Radowoj\Searcher\SearchResult\Collection;
 use Radowoj\Searcher\SearchResult\ICollection;
@@ -65,10 +65,10 @@ class Bing extends SearchProvider implements ISearchProvider
     /**
      * Handle 4xx responses (usually quota or rate limit, so authorisation and other stuff will be thrown as
      * generic Searcher exception)
-     * @param  GuzzleResponse $result result from Guzzle
+     * @param  Psr7Response $result result from Guzzle
      * @TODO this should be called in base SearchProvider search() template method, needs refactoring
      */
-    protected function handleErrorResponse(GuzzleResponse $result)
+    protected function handleErrorResponse(Psr7Response $result)
     {
         switch($result->getStatusCode()) {
             case 403:   //Out of call volume quota
