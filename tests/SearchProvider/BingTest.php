@@ -39,7 +39,7 @@ class BingTest extends TestCase
     }
 
 
-    protected function getResponseMock($returnValue = null)
+    protected function getResponseMock($returnValue = null, $statusCode = 200)
     {
         if (is_null($returnValue)) {
             $returnValue = (object)[
@@ -51,15 +51,19 @@ class BingTest extends TestCase
             ];
         }
 
-        $responseMock = $this->getMockBuilder(GuzzleHttp\Psr7\Response::class)
-            ->setMethods(['getBody'])
+        $responseMock = $this->getMockBuilder('\GuzzleHttp\Psr7\Response')
+            ->setMethods(['getBody', 'getStatusCode'])
             ->getMock();
 
-        $responseMock->expects($this->once())
+        $responseMock->expects($this->any())
             ->method('getBody')
             ->willReturn(json_encode(
                 $returnValue
             ));
+
+        $responseMock->expects($this->any())
+            ->method('getStatusCode')
+            ->willReturn($statusCode);
 
         return $responseMock;
     }
@@ -152,6 +156,56 @@ class BingTest extends TestCase
         $bing = new Bing($guzzleMock, self::TEST_API_KEY);
         $result = $bing->search('something');
         $this->assertInstanceOf(ICollection::class, $result);
+    }
+
+
+    /**
+     * @expectedException Radowoj\Searcher\Exceptions\QuotaExceededException
+     */
+    public function testQuotaExceeded()
+    {
+        $guzzleMock = $this->guzzleMockBuilder->setMethods(['request'])->getMock();
+        $responseMock = $this->getResponseMock((object)[], 403);
+        $guzzleMock->expects($this->once())
+            ->method('request')
+            ->willReturn($responseMock);
+
+        $bing = new Bing($guzzleMock, self::TEST_API_KEY);
+        $result = $bing->search('something');
+    }
+
+
+    /**
+     * @expectedException Radowoj\Searcher\Exceptions\RateLimitExceededException
+     */
+    public function testRateLimitExceeded()
+    {
+        $guzzleMock = $this->guzzleMockBuilder->setMethods(['request'])->getMock();
+        $responseMock = $this->getResponseMock((object)[], 429);
+        $guzzleMock->expects($this->once())
+            ->method('request')
+            ->willReturn($responseMock);
+
+        $bing = new Bing($guzzleMock, self::TEST_API_KEY);
+        $result = $bing->search('something');
+    }
+
+    /**
+     * @expectedException Radowoj\Searcher\Exceptions\Exception
+     */
+    public function testHttpError()
+    {
+        $guzzleMock = $this->guzzleMockBuilder->setMethods(['request'])->getMock();
+
+        //possible only if Bing search server is a teapot, but... let's test it ;p
+        $responseMock = $this->getResponseMock((object)[], 418);
+        $guzzleMock->expects($this->once())
+            ->method('request')
+            ->willReturn($responseMock);
+
+        $bing = new Bing($guzzleMock, self::TEST_API_KEY);
+        $result = $bing->search('something');
+
     }
 
 

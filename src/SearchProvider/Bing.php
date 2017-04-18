@@ -3,15 +3,18 @@
 namespace Radowoj\Searcher\SearchProvider;
 
 use stdClass;
-use Exception;
 
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Psr7\Response as GuzzleResponse;
 
 use Radowoj\Searcher\SearchResult\Collection;
 use Radowoj\Searcher\SearchResult\ICollection;
 use Radowoj\Searcher\SearchResult\Item;
 use Radowoj\Searcher\SearchResult\IItem;
 
+use Radowoj\Searcher\Exceptions\Exception;
+use Radowoj\Searcher\Exceptions\QuotaExceededException;
+use Radowoj\Searcher\Exceptions\RateLimitExceededException;
 
 class Bing extends SearchProvider implements ISearchProvider
 {
@@ -45,12 +48,36 @@ class Bing extends SearchProvider implements ISearchProvider
             'GET',
             $uri, [
                 'headers' => [
-                    self::API_KEY_HEADER => $this->apiKey
-                ]
+                    self::API_KEY_HEADER => $this->apiKey,
+                ],
+                'http_errors' => false,
             ]
         );
 
+        if ($result->getStatusCode() !== 200) {
+            $this->handleErrorResponse($result);
+        }
+
         return json_decode($result->getBody());
+    }
+
+
+    /**
+     * Handle 4xx responses (usually quota or rate limit, so authorisation and other stuff will be thrown as
+     * generic Searcher exception)
+     * @param  GuzzleResponse $result result from Guzzle
+     * @TODO this should be called in base SearchProvider search() template method, needs refactoring
+     */
+    protected function handleErrorResponse(GuzzleResponse $result)
+    {
+        switch($result->getStatusCode()) {
+            case 403:   //Out of call volume quota
+                throw new QuotaExceededException($result->getReasonPhrase());
+            case 429:   //Rate limit is exceeded
+                throw new RateLimitExceededException($result->getReasonPhrase());
+            default:
+                throw new Exception("Bing API responded with HTTP status {$result->getStatusCode()} - {$result->getReasonPhrase()}");
+        }
     }
 
 
@@ -86,7 +113,7 @@ class Bing extends SearchProvider implements ISearchProvider
             ? $result->webPages->totalEstimatedMatches
             : 0;
     }
-    
+
 
     protected function populateItem(stdClass $item) : IItem
     {
