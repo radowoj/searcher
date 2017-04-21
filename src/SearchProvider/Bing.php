@@ -54,23 +54,24 @@ class Bing extends SearchProvider implements ISearchProvider
             ]
         );
 
-        if ($result->getStatusCode() !== 200) {
-            $this->handleErrorResponse($result);
-        }
-
-        return json_decode($result->getBody());
+        return $this->decodeResponse($result);
     }
 
 
     /**
-     * Handle 4xx responses (usually quota or rate limit, so authorisation and other stuff will be thrown as
-     * generic Searcher exception)
+     * Handle response based on HTTP status code (catches 400s - usually quota or rate limit,
+     * so authorisation errors and other stuff will be thrown as generic Searcher exception)
+     *
+     * On status == 200 it simply returns json-decoded response.
+     *
      * @param  Psr7Response $result result from Guzzle
-     * @TODO this should be called in base SearchProvider search() template method, needs refactoring
+     * @return array
      */
-    protected function handleErrorResponse(Psr7Response $result)
+    protected function decodeResponse(Psr7Response $result) : stdClass
     {
         switch($result->getStatusCode()) {
+            case 200:
+                return json_decode($result->getBody());
             case 403:   //Out of call volume quota
                 throw new QuotaExceededException($result->getReasonPhrase());
             case 429:   //Rate limit is exceeded

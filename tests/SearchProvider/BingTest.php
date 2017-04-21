@@ -17,8 +17,7 @@ class BingTest extends TestCase
 
     public function setUp()
     {
-        $this->guzzleMockBuilder = $this->getMockBuilder(GuzzleClient::class)
-            ->setMethods([]);
+        $this->guzzleMockBuilder = $this->getMockBuilder(GuzzleClient::class);
     }
 
 
@@ -205,7 +204,6 @@ class BingTest extends TestCase
 
         $bing = new Bing($guzzleMock, self::TEST_API_KEY);
         $result = $bing->search('something');
-
     }
 
 

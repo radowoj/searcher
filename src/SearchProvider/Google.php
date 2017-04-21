@@ -3,15 +3,18 @@
 namespace Radowoj\Searcher\SearchProvider;
 
 use stdClass;
-use Exception;
 
 use GuzzleHttp\Client as GuzzleClient;
+use Psr\Http\Message\ResponseInterface as Psr7Response;
 
 use Radowoj\Searcher\SearchResult\Collection;
 use Radowoj\Searcher\SearchResult\ICollection;
 use Radowoj\Searcher\SearchResult\Item;
 use Radowoj\Searcher\SearchResult\IItem;
 
+use Radowoj\Searcher\Exceptions\Exception;
+use Radowoj\Searcher\Exceptions\QuotaExceededException;
+use Radowoj\Searcher\Exceptions\RateLimitExceededException;
 
 class Google extends SearchProvider implements ISearchProvider
 {
@@ -57,8 +60,39 @@ class Google extends SearchProvider implements ISearchProvider
     {
         $uri = self::URI . $this->getSearchQueryString($query, $limit, $offset);
 
-        $result = $this->guzzle->request('GET', $uri);
-        return json_decode($result->getBody());
+        $result = $this->guzzle->request(
+            'GET',
+            $uri, [
+                'http_errors' => false,
+            ]
+        );
+
+        return $this->decodeResponse($result);
+    }
+
+
+    /**
+     * Handle response based on HTTP status code (catches 400s - usually quota or rate limit,
+     * so authorisation errors and other stuff will be thrown as generic Searcher exception)
+     *
+     * On status == 200 it simply returns json-decoded response.
+     *
+     * @param  Psr7Response $result result from Guzzle
+     * @return array
+     */
+    protected function decodeResponse(Psr7Response $result) : stdClass
+    {
+        $decodedResult = json_decode($result->getBody());
+        switch($result->getStatusCode()) {
+            case 200:
+                return $decodedResult;
+            case 403:
+                throw new QuotaExceededException(
+                    $decodedResult->error->message ?? $result->getReasonPhrase()
+                );
+            default:
+                throw new Exception("Google API responded with HTTP status {$result->getStatusCode()} - {$result->getReasonPhrase()}");
+        }
     }
 
 
